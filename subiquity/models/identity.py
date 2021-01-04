@@ -36,18 +36,14 @@ class IdentityModel(object):
 
     def __init__(self):
         self._user = None
-        self._hostname = None
 
     def add_user(self, result):
         result = result.copy()
-        self._hostname = result.pop('hostname')
         if not result.get('realname'):
             result['realname'] = result['username']
+        if 'hostname' in result:
+            del result['hostname']
         self._user = User(**result)
-
-    @property
-    def hostname(self):
-        return self._hostname
 
     @property
     def user(self):
@@ -57,4 +53,22 @@ class IdentityModel(object):
         return crypt_password(passinput)
 
     def __repr__(self):
-        return "<LocalUser: {} {}>".format(self.user, self.hostname)
+        return "<LocalUser: {}>".format(self.user)
+
+
+class IdentityHostnameModel(object):
+    """ Model representing host identity
+    """
+
+    def __init__(self):
+        self._hostname = None
+
+    def add_hostname(self, result):
+        self._hostname = result.get('hostname')
+
+    @property
+    def hostname(self):
+        return self._hostname
+
+    def __repr__(self):
+        return "<LocalHstname: {}>".format(self.hostname)

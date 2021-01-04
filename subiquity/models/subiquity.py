@@ -36,7 +36,7 @@ from .mirror import MirrorModel
 from .network import NetworkModel
 from .snaplist import SnapListModel
 from .ssh import SSHModel
-from .identity import IdentityModel
+from .identity import IdentityModel, IdentityHostnameModel
 
 
 log = logging.getLogger('subiquity.models.subiquity')
@@ -77,6 +77,7 @@ INSTALL_MODEL_NAMES = [
 # Models that contribute to the cloud-init config (and other postinstall steps)
 POSTINSTALL_MODEL_NAMES = [
     "identity",
+    "identityhostname",
     "locale",
     "packages",
     "snaplist",
@@ -109,6 +110,7 @@ class SubiquityModel:
         self.debconf_selections = DebconfSelectionsModel()
         self.filesystem = FilesystemModel()
         self.identity = IdentityModel()
+        self.identityhostname = IdentityHostnameModel()
         self.keyboard = KeyboardModel(self.root)
         self.locale = LocaleModel()
         self.mirror = MirrorModel()
@@ -151,7 +153,7 @@ class SubiquityModel:
             'locale': self.locale.selected_language + '.UTF-8',
             'resize_rootfs': False,
         }
-        if self.identity.hostname is not None:
+        if self.identityhostname.hostname is not None:
             config['preserve_hostname'] = True
         user = self.identity.user
         if user:
@@ -217,8 +219,8 @@ class SubiquityModel:
             ('etc/cloud/cloud.cfg.d/99-installer.cfg', config, 0o600),
             ('etc/cloud/ds-identify.cfg', 'policy: enabled\n', 0o644),
             ]
-        if self.identity.hostname is not None:
-            hostname = self.identity.hostname.strip()
+        if self.identityhostname.hostname is not None:
+            hostname = self.identityhostname.hostname.strip()
             files.extend([
                 ('etc/hostname', hostname + "\n", 0o644),
                 ('etc/hosts', HOSTS_CONTENT.format(hostname=hostname), 0o644),

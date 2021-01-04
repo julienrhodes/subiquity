@@ -18,6 +18,7 @@ from .debconf import DebconfController
 from .error import ErrorController
 from .filesystem import FilesystemController
 from .identity import IdentityController
+from .identity import IdentityHostnameController
 from .installprogress import InstallProgressController
 from .keyboard import KeyboardController
 from .package import PackageController
@@ -39,6 +40,7 @@ __all__ = [
     'ErrorController',
     'FilesystemController',
     'IdentityController',
+    'IdentityHostnameController',
     'InstallProgressController',
     'KeyboardController',
     'LateController',

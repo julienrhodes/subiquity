@@ -118,6 +118,7 @@ class Subiquity(TuiApplication):
         "Refresh",
         "Filesystem",
         "Identity",
+        "IdentityHostname",
         "SSH",
         "SnapList",
         "InstallProgress",

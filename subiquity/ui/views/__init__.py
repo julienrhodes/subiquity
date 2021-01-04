@@ -17,7 +17,7 @@ from .filesystem import (
     FilesystemView,
     GuidedDiskSelectionView,
     )
-from .identity import IdentityView
+from .identity import IdentityView, IdentityHostnameView
 from .installprogress import ProgressView
 from .keyboard import KeyboardView
 from .welcome import WelcomeView
@@ -26,6 +26,7 @@ __all__ = [
     'FilesystemView',
     'GuidedDiskSelectionView',
     'IdentityView',
+    'IdentityHostnameView',
     'KeyboardView',
     'ProgressView',
     'WelcomeView',
