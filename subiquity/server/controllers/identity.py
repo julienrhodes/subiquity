@@ -20,28 +20,29 @@ import attr
 from subiquitycore.context import with_context
 
 from subiquity.common.apidef import API
-from subiquity.common.types import IdentityData
+from subiquity.common.types import IdentityData, IdentityHostnameData
 from subiquity.server.controller import SubiquityController
 
 log = logging.getLogger('subiquity.server.controllers.identity')
 
+AUTOINSTALL_SCHEMA = {
+    'type': 'object',
+    'properties': {
+        'realname': {'type': 'string'},
+        'username': {'type': 'string'},
+        'hostname': {'type': 'string'},
+        'password': {'type': 'string'},
+        },
+    'required': ['username', 'hostname', 'password'],
+    'additionalProperties': False,
+    }
 
 class IdentityController(SubiquityController):
 
     endpoint = API.identity
 
     autoinstall_key = model_name = "identity"
-    autoinstall_schema = {
-        'type': 'object',
-        'properties': {
-            'realname': {'type': 'string'},
-            'username': {'type': 'string'},
-            'hostname': {'type': 'string'},
-            'password': {'type': 'string'},
-            },
-        'required': ['username', 'hostname', 'password'],
-        'additionalProperties': False,
-        }
+    autoinstall_schema = AUTOINSTALL_SCHEMA
 
     def load_autoinstall_data(self, data):
         if data is not None:
@@ -63,7 +64,6 @@ class IdentityController(SubiquityController):
         if self.model.user is None:
             return {}
         r = attr.asdict(self.model.user)
-        r['hostname'] = self.model.hostname
         return r
 
     async def GET(self) -> IdentityData:
@@ -71,10 +71,53 @@ class IdentityController(SubiquityController):
         if self.model.user is not None:
             data.username = self.model.user.username
             data.realname = self.model.user.realname
-        if self.model.hostname:
-            data.hostname = self.model.hostname
         return data
 
     async def POST(self, data: IdentityData):
         self.model.add_user(data)
+        self.configured()
+
+
+class IdentityHostnameController(SubiquityTuiController):
+
+    # Hostname was split out from identity, to maintain backwards
+    # compabilility, this controller continues to use identity's autoinstall
+    # key.
+    autoinstall_key = "identity"
+    model_name = "identityhostname"
+    autoinstall_schema = AUTOINSTALL_SCHEMA
+
+    def interactive(self):
+        if not self.app.autoinstall_config:
+            return True
+        i_sections = self.app.autoinstall_config.get(
+            'interactive-sections', [])
+        # Use model_name instead of autoinstall_key when checking for
+        # interactive-sections specification.
+        return '*' in i_sections or self.model_name in i_sections
+
+    def load_autoinstall_data(self, data):
+        if data is not None:
+            self.model.add_hostname(data)
+
+    @with_context()
+    async def apply_autoinstall_config(self, context=None):
+        if not self.model.hostname:
+            if 'user-data' not in self.app.autoinstall_config:
+                raise Exception("no identity hostname data provided")
+
+    def make_autoinstall(self):
+        if self.model.hostname is None:
+            return {}
+        r = attr.asdict(self.model.hostname)
+        return r
+
+    async def GET(self) -> IdentityHostnameData:
+        data = IdentityHostnameData()
+        if self.model.hostname:
+            data.hostname = self.model.hostname
+        return data
+
+    async def POST(self, data: IdentityHostnameData):
+        self.model.add_hostname(data)
         self.configured()

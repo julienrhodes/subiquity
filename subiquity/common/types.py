@@ -153,8 +153,10 @@ class IdentityData:
     realname: str = ''
     username: str = ''
     crypted_password: str = attr.ib(default='', repr=False)
-    hostname: str = ''
 
+@attr.s(auto_attribs=True)
+class IdentityHostnameData:
+    hostname: str = ''
 
 @attr.s(auto_attribs=True)
 class SSHData:

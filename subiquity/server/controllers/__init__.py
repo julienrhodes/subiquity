@@ -18,6 +18,7 @@ from .debconf import DebconfController
 from .filesystem import FilesystemController
 from .identity import IdentityController
 from .install import InstallController
+from .identity import IdentityHostnameController
 from .keyboard import KeyboardController
 from .locale import LocaleController
 from .mirror import MirrorController
@@ -38,6 +39,7 @@ __all__ = [
     'ErrorController',
     'FilesystemController',
     'IdentityController',
+    'IdentityHostnameController',
     'InstallController',
     'KeyboardController',
     'LateController',

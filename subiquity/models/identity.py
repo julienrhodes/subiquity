@@ -34,10 +34,8 @@ class IdentityModel(object):
 
     def __init__(self):
         self._user = None
-        self._hostname = None
 
     def add_user(self, identity_data):
-        self._hostname = identity_data.hostname
         d = {}
         d['realname'] = identity_data.realname
         d['username'] = identity_data.username
@@ -47,12 +45,26 @@ class IdentityModel(object):
         self._user = User(**d)
 
     @property
-    def hostname(self):
-        return self._hostname
-
-    @property
     def user(self):
         return self._user
 
     def __repr__(self):
-        return "<LocalUser: {} {}>".format(self.user, self.hostname)
+        return "<LocalUser: {}>".format(self.user)
+
+
+class IdentityHostnameModel(object):
+    """ Model representing host identity
+    """
+
+    def __init__(self):
+        self._hostname = None
+
+    def add_hostname(self, hostname):
+        self._hostname = hostname_data.hostname
+
+    @property
+    def hostname(self):
+        return self._hostname
+
+    def __repr__(self):
+        return "<LocalHstname: {}>".format(self.hostname)

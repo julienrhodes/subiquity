@@ -34,7 +34,7 @@ from subiquitycore.ui.utils import screen
 from subiquitycore.utils import crypt_password
 from subiquitycore.view import BaseView
 
-from subiquity.common.types import IdentityData
+from subiquity.common.types import IdentityData, IdentityHostnameData
 
 
 log = logging.getLogger("subiquity.views.identity")
@@ -77,26 +77,10 @@ RealnameField = simple_field(RealnameEditor)
 UsernameField = simple_field(UsernameEditor)
 PasswordField = simple_field(PasswordEditor)
 
-
-class IdentityForm(Form):
-
-    def __init__(self, reserved_usernames, initial):
-        self.reserved_usernames = reserved_usernames
-        super().__init__(initial=initial)
-
-    realname = RealnameField(_("Your name:"))
+class IdentityHostnameForm(Form):
     hostname = UsernameField(
         _("Your server's name:"),
         help=_("The name it uses when it talks to other computers."))
-    username = UsernameField(_("Pick a username:"))
-    password = PasswordField(_("Choose a password:"))
-    confirm_password = PasswordField(_("Confirm your password:"))
-
-    def validate_realname(self):
-        if len(self.realname.value) > REALNAME_MAXLEN:
-            return _(
-                "Name too long, must be less than {limit}"
-                ).format(limit=REALNAME_MAXLEN)
 
     def validate_hostname(self):
         if len(self.hostname.value) < 1:
@@ -109,6 +93,23 @@ class IdentityForm(Form):
 
         if not re.match(r'[a-z_][a-z0-9_-]*', self.hostname.value):
             return _("Hostname must match NAME_REGEX, i.e. [a-z_][a-z0-9_-]*")
+
+class IdentityForm(Form):
+
+    def __init__(self, reserved_usernames, initial):
+        self.reserved_usernames = reserved_usernames
+        super().__init__(initial=initial)
+
+    realname = RealnameField(_("Your name:"))
+    username = UsernameField(_("Pick a username:"))
+    password = PasswordField(_("Choose a password:"))
+    confirm_password = PasswordField(_("Confirm your password:"))
+
+    def validate_realname(self):
+        if len(self.realname.value) > REALNAME_MAXLEN:
+            return _(
+                "Name too long, must be less than {limit}"
+                ).format(limit=REALNAME_MAXLEN)
 
     def validate_username(self):
         username = self.username.value
@@ -175,8 +176,7 @@ class IdentityView(BaseView):
         initial = {
             'realname': identity_data.realname,
             'username': identity_data.username,
-            'hostname': identity_data.hostname,
-            }
+        }
 
         self.form = IdentityForm(reserved_usernames, initial)
 
@@ -197,3 +197,32 @@ class IdentityView(BaseView):
             username=self.form.username.value,
             crypted_password=crypt_password(self.form.password.value),
             ))
+
+
+class IdentityHostnameView(BaseView):
+    title = _("Hostname setup")
+    excerpt = _("Enter the hostname")
+
+    def __init__(self, controller, hostname_data):
+        self.controller = controller
+
+        # Pre-fill the field with value from autoinstall (only helps for forced
+        # interaction by interactive-sections), otherwise you won't see
+        # pre-filled field.
+        initial = {'hostname': hostname_data.hostname}
+
+        self.form = IdentityHostnameForm(initial)
+
+        connect_signal(self.form, 'submit', self.done)
+
+        super().__init__(
+            screen(
+                self.form.as_rows(),
+                [self.form.done_btn],
+                excerpt=_(self.excerpt),
+                focus_buttons=False))
+
+    def done(self, result):
+        self.controller.done(IdentityHostnameData(
+            hostname=self.form.hostname.value,
+        )
