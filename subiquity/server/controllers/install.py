@@ -241,7 +241,8 @@ class InstallController(SubiquityController):
 
             await self.postinstall(context=context)
 
-            if self.model.network.has_network:
+            if (self.model.network.has_network and not
+                    os.path.exists('/DISABLE_UPDATE')):
                 self.app.update_state(ApplicationState.UU_RUNNING)
                 await self.run_unattended_upgrades(context=context)
 
