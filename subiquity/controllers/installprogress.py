@@ -314,7 +314,8 @@ class InstallProgressController(SubiquityTuiController):
             self.progress_view.set_status(_("Finished install!"))
             self.progress_view.show_complete()
 
-            if self.model.network.has_network:
+            if (self.model.network.has_network and not
+                    os.path.exists('/DISABLE_UPDATE')):
                 self.progress_view.update_running()
                 await self.run_unattended_upgrades(context=context)
                 self.progress_view.update_done()
