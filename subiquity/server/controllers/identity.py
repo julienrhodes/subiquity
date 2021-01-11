@@ -49,7 +49,6 @@ class IdentityController(SubiquityController):
             identity_data = IdentityData(
                 realname=data.get('realname', ''),
                 username=data['username'],
-                hostname=data['hostname'],
                 crypted_password=data['password'],
                 )
             self.model.add_user(identity_data)

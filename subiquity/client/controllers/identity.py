@@ -16,8 +16,8 @@
 import logging
 
 from subiquity.client.controller import SubiquityTuiController
-from subiquity.common.types import IdentityData
-from subiquity.ui.views import IdentityView
+from subiquity.common.types import IdentityData, IdentityHostnameData
+from subiquity.ui.views import IdentityView, IdentityHostnameView
 
 log = logging.getLogger('subiquity.client.controllers.identity')
 
@@ -51,7 +51,7 @@ class IdentityController(SubiquityTuiController):
 
 class IdentityHostnameController(SubiquityTuiController):
 
-    endpoint_name = 'identity'
+    endpoint_name = 'identityhostname'
 
     async def make_ui(self):
         data = await self.endpoint.GET()

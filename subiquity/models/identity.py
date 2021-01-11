@@ -59,7 +59,7 @@ class IdentityHostnameModel(object):
     def __init__(self):
         self._hostname = None
 
-    def add_hostname(self, hostname):
+    def add_hostname(self, hostname_data):
         self._hostname = hostname_data.hostname
 
     @property

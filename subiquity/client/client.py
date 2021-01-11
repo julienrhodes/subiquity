@@ -103,6 +103,7 @@ class SubiquityClient(TuiApplication):
         "Refresh",
         "Filesystem",
         "Identity",
+        "IdentityHostname",
         "SSH",
         "SnapList",
         "Progress",
