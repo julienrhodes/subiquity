@@ -4,9 +4,8 @@ from unittest import mock
 from subiquitycore.signals import Signal
 from subiquitycore.testing import view_helpers
 
-from subiquity.controllers.identity import IdentityController, IdentityHostnameController
+from subiquity.client.controllers.identity import IdentityController, IdentityHostnameController
 from subiquity.common.types import IdentityData, IdentityHostnameData
-from subiquity.ui.views.identity import IdentityView
 from subiquity.ui.views.identity import IdentityView, IdentityHostnameView
 
 
@@ -17,7 +16,7 @@ identity_data = {
     'confirm_password': 'password'
     }
 
-identityhostname_data = {
+hostname_data = {
     'hostname': 'ubuntu-server'
 }
 
@@ -52,12 +51,12 @@ class IdentityViewTests(unittest.TestCase):
         CRYPTED = '<crypted>'
         with mock.patch('subiquity.ui.views.identity.crypt_password') as cp:
             cp.side_effect = lambda p: CRYPTED
-            view_helpers.enter_data(view.form, valid_data)
+            view_helpers.enter_data(view.form, identity_data)
             done_btn = view_helpers.find_button_matching(view, "^Done$")
             view_helpers.click(done_btn)
         expected = IdentityData(
-            realname=valid_data['realname'],
-            username=valid_data['username'],
+            realname=identity_data['realname'],
+            username=identity_data['username'],
             crypted_password=CRYPTED)
         view.controller.done.assert_called_once_with(expected)
 
@@ -84,10 +83,9 @@ class IdentityViewTests(unittest.TestCase):
 class IdentityHostnameViewTests(unittest.TestCase):
 
     def make_view(self):
-        model = mock.create_autospec(spec=IdentityHostnameModel)
         controller = mock.create_autospec(spec=IdentityHostnameController)
         controller.signal = mock.create_autospec(spec=Signal)
-        return IdentityHostnameView(model, controller)
+        return IdentityHostnameView(controller, IdentityHostnameData())
 
     def test_done_initially_disabled(self):
         view = self.make_view()
@@ -95,17 +93,18 @@ class IdentityHostnameViewTests(unittest.TestCase):
 
     def test_done_enabled_when_valid(self):
         view = self.make_view()
-        view_helpers.enter_data(view.form, identityhostname_data)
+        view_helpers.enter_data(view.form, hostname_data)
         self.assertTrue(view.form.done_btn.enabled)
 
     def test_click_done(self):
         view = self.make_view()
-        view_helpers.enter_data(view.form, identityhostname_data)
-
+        view_helpers.enter_data(view.form, hostname_data)
         done_btn = view_helpers.find_button_matching(view, "^Done$")
         view_helpers.click(done_btn)
-
-        view.controller.done.assert_called_once_with(identityhostname_data)
+        expected = IdentityHostnameData(
+            hostname=hostname_data['hostname']
+        )
+        view.controller.done.assert_called_once_with(expected)
 
     def test_can_tab_to_done_when_valid(self):
         # Urwid doesn't distinguish very well between widgets that are
@@ -116,7 +115,7 @@ class IdentityHostnameViewTests(unittest.TestCase):
         # by simulating lots of presses of the tab key and checking if
         # the done button has been focused.
         view = self.make_view()
-        view_helpers.enter_data(view.form, identityhostname_data)
+        view_helpers.enter_data(view.form, hostname_data)
 
         for i in range(100):
             view_helpers.keypress(view, 'tab', size=(80, 24))

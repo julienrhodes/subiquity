@@ -78,7 +78,7 @@ class IdentityController(SubiquityController):
         self.configured()
 
 
-class IdentityHostnameController(SubiquityTuiController):
+class IdentityHostnameController(SubiquityController):
 
     # Hostname was split out from identity, to maintain backwards
     # compabilility, this controller continues to use identity's autoinstall

@@ -32,11 +32,10 @@ class IdentityController(SubiquityTuiController):
 
     def run_answers(self):
         if all(elem in self.answers for elem in
-               ['realname', 'username', 'password', 'hostname']):
+               ['realname', 'username', 'password']):
             identity = IdentityData(
                 realname=self.answers['realname'],
                 username=self.answers['username'],
-                hostname=self.answers['hostname'],
                 crypted_password=self.answers['password'])
             self.done(identity)
 
@@ -48,3 +47,25 @@ class IdentityController(SubiquityTuiController):
             "IdentityController.done next_screen user_spec=%s",
             identity_data)
         self.app.next_screen(self.endpoint.POST(identity_data))
+
+
+class IdentityHostnameController(SubiquityTuiController):
+
+    endpoint_name = 'identity'
+
+    async def make_ui(self):
+        data = await self.endpoint.GET()
+        return IdentityHostnameView(self, data)
+
+    def run_answers(self):
+        if 'hostname' in self.answers:
+            self.done(IdentityHostnameData(hostname=self.answers['hostname']))
+
+    def cancel(self):
+        self.app.prev_screen()
+
+    def done(self, hostname_data):
+        log.debug(
+            "IdentityHostnameController.done next_screen user_spec=%s",
+            hostname_data)
+        self.app.next_screen(self.endpoint.POST(hostname_data))

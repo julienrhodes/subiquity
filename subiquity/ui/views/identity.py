@@ -192,7 +192,6 @@ class IdentityView(BaseView):
 
     def done(self, result):
         self.controller.done(IdentityData(
-            hostname=self.form.hostname.value,
             realname=self.form.realname.value,
             username=self.form.username.value,
             crypted_password=crypt_password(self.form.password.value),
