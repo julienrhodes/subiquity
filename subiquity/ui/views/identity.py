@@ -224,5 +224,5 @@ class IdentityHostnameView(BaseView):
 
     def done(self, result):
         self.controller.done(IdentityHostnameData(
-            hostname=self.form.hostname.value,
-        )
+            hostname=self.form.hostname.value
+        ))
